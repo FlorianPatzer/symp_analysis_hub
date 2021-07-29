@@ -1,0 +1,37 @@
+version: '3.9'
+services:
+  symp-neo4j:
+    image: neo4j:4.2.7
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - $HOME/neo4j/data:/data
+      - $HOME/neo4j/logs:/logs
+      - $HOME/neo4j/import:/var/lib/neo4j/import
+      - $HOME/neo4j/plugins:/plugins
+    environment:
+      NEO4JLABS_PLUGINS: '["apoc", "n10s"]'
+      NEO4J_AUTH: neo4j/test
+      NEO4J_dbms_unmanaged__extension__classes: "n10s.endpoint=/rdf"
+    container_name: symp-neo4j
+    restart: unless-stopped
+    networks:
+      - symp
+
+  symp-ah:
+    build: .
+    ports:
+      - "8545:8545"
+    container_name: symp-ah
+    environment: 
+      PROFILE: prod
+    restart: unless-stopped
+    networks:
+      - symp
+
+networks:
+  symp:
+    external:
+      name: symp
+

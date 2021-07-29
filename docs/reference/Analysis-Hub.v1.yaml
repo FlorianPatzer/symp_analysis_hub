@@ -1,0 +1,91 @@
+openapi: 3.0.0
+info:
+  title: Analysis Hub
+  version: '1.0'
+servers:
+  - url: 'http://localhost:3000'
+paths:
+  '/policyimplementation/{policyImplementationName}':
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyImplementation'
+              examples:
+                example-1:
+                  value:
+                    id: 0
+                    name: string
+                    description: string
+                    lastChanged: '2019-08-24T14:15:22Z'
+                    modelLink: 'http://example.com/policy/{policyId}/model'
+      operationId: get-policy
+    parameters:
+      - schema:
+          type: string
+        name: policyImplementationName
+        in: path
+        required: true
+  '/policyimplementation/{policyImplementationName}/model':
+    parameters:
+      - schema:
+          type: string
+        name: policyImplementationName
+        in: path
+        required: true
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/octet-stream:
+              schema:
+                type: object
+                properties: {}
+              examples: {}
+      operationId: get-policy-policyId-model
+  '/ontology-dependency/{ontoDepName}':
+    parameters:
+      - schema:
+          type: string
+        name: ontoDepName
+        in: path
+        required: true
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/octet-stream:
+              schema:
+                type: object
+                properties: {}
+      operationId: get-ontology-dependency-ontodepId
+components:
+  schemas:
+    PolicyImplementation:
+      title: policyImplementation
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+        lastChanged:
+          type: string
+          format: date-time
+        modelLink:
+          type: string
+          format: uri
