@@ -54,7 +54,7 @@ public class AddJenaRuleView extends Div {
         binder.bind(description, JenaRule::getDescription, JenaRule::setDescription);
         binder.forField(phase).asRequired("Phase needed").bind(jenaRule -> phaseService.getStaticPhaseByPhase(jenaRule.getPhase()),
                 (jenaRule, staticPhase) -> jenaRule.setPhase(phaseService.getPhaseByStaticPhase(staticPhase)));
-        // maps implementations to resource uri projections.
+        // maps implementations to resource uri projections. TODO should be done by a mapper
         binder.bind(dependsOnImplementation,
                 jenaRule -> jenaRule.getDependsOnImplementation().stream()
                         .map(implementation -> new ResourceUriProjection(implementation.getId(), implementation.getUri()))

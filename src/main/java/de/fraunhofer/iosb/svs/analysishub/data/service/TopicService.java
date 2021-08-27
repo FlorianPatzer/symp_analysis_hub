@@ -41,7 +41,11 @@ public class TopicService extends ResourceService<Topic> {
      * If none was found a new one is created.
      */
     public Topic getTopicByNameOrElseCreate(String name) {
+        // TODO do better (ex. add extra view to add topic and then fetch)
         return repository.findByName(name).orElseGet(() -> {
+            // replacing whitespace characters with an underscore
+            // TODO as the topic is also in the implementation of a processing module the topic should not be modified here.
+            // TODO as whitespaces are not allowed, it should throw an error in the view
             Topic topic = new Topic(KNOWLEDGE_BASE_NAMESPACE,
                     name.replaceAll("\\s", "_"),
                     "Auto generated description",
