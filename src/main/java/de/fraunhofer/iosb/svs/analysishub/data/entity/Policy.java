@@ -24,6 +24,16 @@ import static de.fraunhofer.iosb.svs.analysishub.data.entity.PolicyBasedAnalysis
 public class Policy extends NamedIndividual {
     private static final String POLICY_LABEL = NODE_PREFIX + "Policy";
 
+    /* non ontology properties do not work here, as they are also exported as rdf data
+     * Workaround: Create new class with node label policyProperties and add a relationship
+     * Because the cypher query wont reach that new node, it will not be in the exported rdf data.
+     * For now we dont need these properties.
+     * */
+    /*@LastModifiedDate
+    private LocalDateTime lastChanged;
+
+    @Property("_owner")
+    private String owner;*/
 
     @Property(name = DESCRIPTION_LABEL)
     private String description;

@@ -13,8 +13,3 @@
 ## 2. Usage
 
 You can view the application at http://localhost:8545 in your browser.
-
-## Contributors
-Florian Patzer <florian.patzer@iosb.fraunhofer.de>
-
-Manuel Kloppenburg

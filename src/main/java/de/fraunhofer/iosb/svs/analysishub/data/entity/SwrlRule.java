@@ -20,6 +20,7 @@ import static de.fraunhofer.iosb.svs.analysishub.data.entity.PolicyBasedAnalysis
 @Node(primaryLabel = NODE_PREFIX + "SwrlRule")
 public class SwrlRule extends ProcessingRule {
     public SwrlRule(String namespace, String localName, String description, Phase phase, Topic topic, List<Implementation> dependsOnImplementation, List<OntologyDependency> dependsOnOntologyDependency, String rule) {
+        // TODO should always be SWRLTopic
         super(namespace, localName, description, phase, topic, dependsOnImplementation, dependsOnOntologyDependency, rule);
     }
 

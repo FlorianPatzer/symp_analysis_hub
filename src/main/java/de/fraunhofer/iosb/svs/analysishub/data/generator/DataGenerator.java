@@ -18,10 +18,7 @@ import java.util.*;
 import static de.fraunhofer.iosb.svs.analysishub.data.entity.PolicyBasedAnalysis.KNOWLEDGE_BASE_NAMESPACE;
 import static de.fraunhofer.iosb.svs.analysishub.data.service.TopicService.JENA_TOPIC_URI;
 import static de.fraunhofer.iosb.svs.analysishub.data.service.TopicService.SWRL_TOPIC_URI;
-/**
- * This class introduces some example policies and needs to be deactivated or adapted when used outside the Fraunhofer IOSB lab environment.
- *
- */
+
 @SpringComponent
 public class DataGenerator {
     private static final Logger log = LoggerFactory.getLogger(PolicyService.class);
@@ -93,8 +90,6 @@ public class DataGenerator {
             this.addPolicy5(policyRepository, implementationRepository, queryRepository);
 
             this.addPolicy6(ontDepRepository, policyRepository, implementationRepository, queryRepository);
-            
-            this.addPolicy7(policyRepository, implementationRepository, queryRepository);
 
             log.info("Found {} policies", policyRepository.count());
         };
@@ -105,7 +100,12 @@ public class DataGenerator {
         String uri = "https://iosb.fraunhofer.de/ICS-Security/policy-based-analysis-kb#Pfsense_Config_Analysis";
         if (!policyRepository.existsByUri(uri)) {
 
-
+//            Topic x2owlTopic = new Topic(KNOWLEDGE_BASE_NAMESPACE, "X2owltopic", "topic for x2owl worker", "x2owl-worker");
+//            ProcessingModule x2owl = new ProcessingModule(KNOWLEDGE_BASE_NAMESPACE, "x2owl", "config to owl", phaseService.getPhaseByStaticPhase(PhaseService.StaticPhase.KNOWLEDGE_COLLECTION),
+//                    x2owlTopic,
+//                    Collections.emptyList(),
+//                    Collections.emptyList(),
+//                    "x2owl-worker");
 
             SwrlRule mergeRedundant = new SwrlRule(KNOWLEDGE_BASE_NAMESPACE,
                     "Merge_Redundant_Netwoks_and_Build_Network_Hierarchy",
@@ -151,7 +151,7 @@ public class DataGenerator {
                     "Create_PfSense_Effective_Configuration", "Create PfSense Effective Configuration",
                     phaseService.getPhaseByStaticPhase(PhaseService.StaticPhase.STATIC_KNOWLEDGE_EXTENSION),
                     pfsenseTopic, Arrays.asList(addAssetsToNetworks, relateToParentNetworks, swrlPreparePfsense),
-                    Collections.emptyList(), "fw_effective_configuration" ,"fec");
+                    Collections.emptyList(), "gitlab-ext.iosb.fraunhofer.de:4567/symp/external-workers/fw_effective_configuration", "fec", "dev");
 
             SwrlRule furtherConnect = new SwrlRule(KNOWLEDGE_BASE_NAMESPACE, "Further_Connect_Flows_to_Network",
                     "Further Connect Flows to Network",
@@ -412,111 +412,5 @@ public class DataGenerator {
             log.info("Create policy {}", icsattck1.getUri());
         }
     }
-    
-    private void addPolicy7(PolicyRepository policyRepository, ImplementationRepository implementationRepository,
-            QueryRepository queryRepository) {
-        String uri = "https://iosb.fraunhofer.de/ICS-Security/policy-based-analysis-kb#Pfsense_Config_Analysis_K8S";
-        if (!policyRepository.existsByUri(uri)) {
-
-            SwrlRule mergeRedundant = new SwrlRule(KNOWLEDGE_BASE_NAMESPACE,
-                    "Merge_Redundant_Netwoks_and_Build_Network_Hierarchy_K8S",
-                    "Merge Redundant Netwoks and Build Network Hierarchy for k8s",
-                    phaseService.getPhaseByStaticPhase(PhaseService.StaticPhase.STATIC_KNOWLEDGE_EXTENSION),
-                    topicService.getTopicByUri(SWRL_TOPIC_URI), new ArrayList<>(), new ArrayList<>(),
-                    "ICS-Security:Network(?n1)^ICS-Security:Network(?n2)^ICS-Security:prefixBits(?n1,?pb1)^ICS-Security:prefixBits(?n2, ?pb2)^swrlb:equal(?pb1, ?pb2)^ICS-Security:ipV4Address(?n1, ?a1)^ICS-Security:ipV4Address(?n2, ?a2)^swrlb:equal(?a1, ?a2)->sameAs(?n1, ?n2)");
-
-            SwrlRule buildNetworkHierarchy = new SwrlRule(KNOWLEDGE_BASE_NAMESPACE, "Build_Network_Hierarchy_K8S",
-                    "Build Network Hierarchy for k8s",
-                    phaseService.getPhaseByStaticPhase(PhaseService.StaticPhase.STATIC_KNOWLEDGE_EXTENSION),
-                    topicService.getTopicByUri(SWRL_TOPIC_URI), new ArrayList<>(), new ArrayList<>(),
-                    "ICS-Security:Network(?n1)\n" + "^ ICS-Security:Network(?n2)\n"
-                            + "^ ICS-Security:ipV4Address(?n1, ?na1)\n" + "^ ICS-Security:ipV4Address(?n2, ?na2)\n"
-                            + "^ ICS-Security:prefixBits(?n1, ?np1)\n" + "^ ICS-Security:prefixBits(?n2, ?np2)\n"
-                            + "^ swrlb:lessThan(?np2, ?np1)\n" + "^ swrlb:subtract(?diff, ?np1, ?np2)\n"
-                            + "^ swrlb:pow(?divisor, 2, ?diff)\n"
-                            + "^ swrlb:divide(?res1, ?na1, ?divisor) ^ swrlb:equal(?na2, ?res1) -> ICS-Security:subnet(?n2, ?n1)");
-
-            SwrlRule addAssetsToNetworks = new SwrlRule(KNOWLEDGE_BASE_NAMESPACE, "Add_Assets_to_Network_K8S",
-                    "Add Assets to Network for k8s",
-                    phaseService.getPhaseByStaticPhase(PhaseService.StaticPhase.STATIC_KNOWLEDGE_EXTENSION),
-                    topicService.getTopicByUri(SWRL_TOPIC_URI), Arrays.asList(mergeRedundant, buildNetworkHierarchy),
-                    new ArrayList<>(),
-                    "ICS-Security:Asset(?a) ^ ICS-Security:Network(?n) ^ ICS-Security:IpV4Interface(?i) ^ ICS-Security:isInNetwork(?i, ?n)^ICS-Security:interface(?a,?i) -> ICS-Security:isInNetwork(?a, ?n)");
-
-            SwrlRule relateToParentNetworks = new SwrlRule(KNOWLEDGE_BASE_NAMESPACE,
-                    "Create_Relations_to_Parent_Networks_K8S", "Create Relations to Parent Networks for k8s",
-                    phaseService.getPhaseByStaticPhase(PhaseService.StaticPhase.STATIC_KNOWLEDGE_EXTENSION),
-                    topicService.getTopicByUri(SWRL_TOPIC_URI), Arrays.asList(mergeRedundant, buildNetworkHierarchy),
-                    new ArrayList<>(),
-                    "ICS-Security:IpV4Interface(?i) ^ ICS-Security:isInNetwork(?i, ?n)^ICS-Security:parentNetwork(?n,?pn) -> ICS-Security:isInNetwork(?i, ?pn)");
-
-            SwrlRule swrlPreparePfsense = new SwrlRule(KNOWLEDGE_BASE_NAMESPACE, "Prepare_pfSense_Rules_K8S",
-                    "Prepare pfSense Rules for k8s",
-                    phaseService.getPhaseByStaticPhase(PhaseService.StaticPhase.STATIC_KNOWLEDGE_EXTENSION),
-                    topicService.getTopicByUri(SWRL_TOPIC_URI), new ArrayList<>(), new ArrayList<>(),
-                    "ICS-Security:PfConfiguration(?config)^ICS-Security:containsRule(?config,?firstRule)^ICS-Security:pfNextRule(?firstRule, ?secondRule)->ICS-Security:containsRule(?config, ?secondRule)");
-
-            Topic pfsenseTopic = new Topic(KNOWLEDGE_BASE_NAMESPACE, "pfsense_effective_config_k8s",
-                    "topic for effektive configuration pfsense worker for k8s", "pfsense_effective_config_k8s");
-            ProcessingModule pfsense = new ProcessingModule(KNOWLEDGE_BASE_NAMESPACE,
-                    "Create_PfSense_Effective_Configuration_K8S", "Create PfSense Effective Configuration for k8s",
-                    phaseService.getPhaseByStaticPhase(PhaseService.StaticPhase.STATIC_KNOWLEDGE_EXTENSION),
-                    pfsenseTopic, Arrays.asList(addAssetsToNetworks, relateToParentNetworks, swrlPreparePfsense),
-                    Collections.emptyList(), "fw_effective_configuration", "fec:feature-rancher-test");
-
-            SwrlRule furtherConnect = new SwrlRule(KNOWLEDGE_BASE_NAMESPACE, "Further_Connect_Flows_to_Network_K8S",
-                    "Further Connect Flows to Network for k8s",
-                    phaseService.getPhaseByStaticPhase(PhaseService.StaticPhase.STATIC_KNOWLEDGE_EXTENSION),
-                    topicService.getTopicByUri(SWRL_TOPIC_URI), Collections.singletonList(pfsense), new ArrayList<>(),
-                    ":AllowedIpV4Flow(?aif)^:srcNetwork(?aif, ?srcNet)^:parentNetwork(?subNet, ?srcNet)->:srcNetwork(?aif, ?subNet)");
-
-            SwrlRule labelOverlappingSrc = new SwrlRule(KNOWLEDGE_BASE_NAMESPACE, "Label_Overlapping_Flows_Src_K8S",
-                    "Label Overlapping Flows Source for k8s",
-                    phaseService.getPhaseByStaticPhase(PhaseService.StaticPhase.DYNAMIC_KNOWLEDGE_EXTENSION),
-                    topicService.getTopicByUri(SWRL_TOPIC_URI), Collections.singletonList(furtherConnect),
-                    new ArrayList<>(),
-                    ":AllowedTcpFlow(?atf)^:DisallowedTcpFlow(?dtf)^:srcPortRange(?atf, ?aSrcPR)^:srcPortRange(?dtf, ?dSrcPR)^:maxPort(?aSrcPR, ?aSrcPMax)^:minPort(?dSrcPR, ?dSrcPMin)^:minPort(?aSrcPR, ?aSrcPMin)^:maxPort(?dSrcPR, ?dSrcPMax)^swrlb:lessThanOrEqual(?aSrcPMax, ?dSrcPMin)^swrlb:lessThanOrEqual(?aSrcPMin, ?dSrcPMax)->:overlapsWith(?dSrcPR, ?aSrcPR)");
-
-            SwrlRule labelOverlappingDst = new SwrlRule(KNOWLEDGE_BASE_NAMESPACE, "Label_Overlapping_Flows_Dst_K8S",
-                    "Label Overlapping Flows Destination for k8s",
-                    phaseService.getPhaseByStaticPhase(PhaseService.StaticPhase.DYNAMIC_KNOWLEDGE_EXTENSION),
-                    topicService.getTopicByUri(SWRL_TOPIC_URI), Collections.singletonList(furtherConnect),
-                    new ArrayList<>(),
-                    ":AllowedTcpFlow(?atf)^:DisallowedTcpFlow(?dtf)^:dstPortRange(?atf, ?aDstPR)^:dstPortRange(?dtf, ?dDstPR)^:maxPort(?aDstPR, ?aDstPMax)^:minPort(?dDstPR, ?dDstPMin)^:minPort(?aDstPR, ?aDstPMin)^:maxPort(?dDstPR, ?dDstPMax)^swrlb:lessThanOrEqual(?aDstPMax, ?dDstPMin)^swrlb:lessThanOrEqual(?aDstPMin, ?dDstPMax)->:overlapsWith(?dDstPR, ?aDstPR)");
-
-            SwrlRule labelConflicts = new SwrlRule(KNOWLEDGE_BASE_NAMESPACE, "Label_Conflicts_K8S", "Label Conflicts_K8S",
-                    phaseService.getPhaseByStaticPhase(PhaseService.StaticPhase.ANALYSIS),
-                    topicService.getTopicByUri(SWRL_TOPIC_URI), Arrays.asList(labelOverlappingSrc, labelOverlappingDst),
-                    new ArrayList<>(),
-                    ":AllowedTcpFlow(?atf)^:DisallowedTcpFlow(?dtf)^\n"
-                            + ":AllowedIpV4Flow(?aif)^:DisallowedIpV4Flow(?dif)^\n"
-                            + ":usesFlow(?atf, ?aif)^:usesFlow(?dtf, ?dif)^\n"
-                            + ":srcNetwork(?aif, ?srcNet)^:srcNetwork(?dif, ?srcNet)^\n"
-                            + ":dstNetwork(?aif, ?dstNet)^:dstNetwork(?dif, ?dstNet)^\n"
-                            + ":portRange(?atf, ?aPR)^:portRange(?dtf, ?dPR)^\n"
-                            + ":overlapsWith(?aPR, ?dPR)->:inConflictWith(?dtf, ?atf)");
-
-            AnalyticQuery queryConfig = new AnalyticQuery(KNOWLEDGE_BASE_NAMESPACE, "Config_Analysis_Query_K8S",
-                    "PREFIX : <http://iosb.fraunhofer.de/ICS-Security#>\n"
-                            + "SELECT ?firewall1 ?firewall2 ?f1 ?f2 WHERE {\n"
-                            + "    ?firewall1 :firewallConfig ?config1.\n" + "    ?config1 :flow ?f1.\n"
-                            + "    ?firewall2 :firewallConfig ?config2.\n" + "    ?config2 :flow ?f2.\n"
-                            + "    ?tcpFlow1 :usesFlow ?f1.\n" + "    ?tcpFlow2 :usesFlow ?f2.\n"
-                            + "    ?tcpFlow1 :inConflictWith ?tcpFlow2.\n" + "}",
-                    Collections.singletonList(labelConflicts), new ArrayList<>());
-            
-            
-            PolicyImplementation policyImplementation = new PolicyImplementation(KNOWLEDGE_BASE_NAMESPACE,
-                    "Config_Analysis_Policy_Implementation_K8S", "Is a policy implementation for Config_Analysis_Example in K8S",
-                    queryConfig);
-
-            Policy configAnalysis = new Policy(uri, "PfSense Config Analysis_K8S",
-                    Collections.singletonList(policyImplementation));
-
-            policyRepository.save(configAnalysis);
-            log.info("Create policy {}", configAnalysis.getUri());
-        }
-
-    }
-
+   
 }

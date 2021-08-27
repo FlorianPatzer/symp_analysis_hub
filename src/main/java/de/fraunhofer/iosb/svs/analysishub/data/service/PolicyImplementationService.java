@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static de.fraunhofer.iosb.svs.analysishub.data.entity.PolicyBasedAnalysis.KNOWLEDGE_BASE_NAMESPACE;
@@ -34,7 +35,6 @@ public class PolicyImplementationService extends ResourceService<PolicyImplement
     private final PolicyImplementationRepository repository;
     private final RDFClient rdfClient;
 
-
     @Autowired
     public PolicyImplementationService(PolicyImplementationRepository repository, RDFClient rdfClient) {
         this.repository = repository;
@@ -47,18 +47,21 @@ public class PolicyImplementationService extends ResourceService<PolicyImplement
     }
 
     public PolicyImplementation getPolicyImplementationByUri(String policyImplementationUri) {
-        return this.getRepository().findByUri(policyImplementationUri).orElseThrow(resourceNotFound(POLICY_IMPLEMENTATION, policyImplementationUri));
+        return this.getRepository().findByUri(policyImplementationUri)
+                .orElseThrow(resourceNotFound(POLICY_IMPLEMENTATION, policyImplementationUri));
     }
 
     /**
-     * Gets the rdf model as ByteArrayResource given the name of the policy implementation.
+     * Gets the rdf model as ByteArrayResource given the name of the policy
+     * implementation.
      */
     public ByteArrayResource getPolicyModelByName(String policyImplementationName) {
         return getPolicyModel(URIUtil.assemble(KNOWLEDGE_BASE_NAMESPACE, policyImplementationName));
     }
 
     /**
-     * Gets the rdf model as ByteArrayResource given the uri of the policy implementation.
+     * Gets the rdf model as ByteArrayResource given the uri of the policy
+     * implementation.
      */
     public ByteArrayResource getPolicyModel(String policyImplementationUri) {
         if (!repository.existsByUri(policyImplementationUri)) {
@@ -72,17 +75,29 @@ public class PolicyImplementationService extends ResourceService<PolicyImplement
     }
 
     public PolicyImplementationDTO getPolicyImplementationDTOByUri(String policyImplementationUri) {
-        PolicyImplementationDTOProjection policyImplementationDTOProjection = getPolicyImplementationDTOProjectionByUri(policyImplementationUri).orElseThrow(resourceNotFound(POLICY_IMPLEMENTATION, policyImplementationUri));
+        PolicyImplementationDTOProjection policyImplementationDTOProjection = getPolicyImplementationDTOProjectionByUri(
+                policyImplementationUri).orElseThrow(resourceNotFound(POLICY_IMPLEMENTATION, policyImplementationUri));
+
         String localName = URIUtil.getLocalName(policyImplementationDTOProjection.getUri());
         String modelLink = getModelLink(localName);
-        return new PolicyImplementationDTO(policyImplementationDTOProjection.getUri(), localName, modelLink, policyImplementationDTOProjection.getDescription(), policyImplementationDTOProjection.getLastChanged());
+        String description = policyImplementationDTOProjection.getDescription();
+        LocalDateTime lastChanged = policyImplementationDTOProjection.getLastChanged();
+
+        return new PolicyImplementationDTO(
+                policyImplementationDTOProjection.getUri(), 
+                localName, 
+                modelLink, 
+                description, 
+                lastChanged);
     }
 
-    public Optional<PolicyImplementationDTOProjection> getPolicyImplementationDTOProjectionByUri(String policyImplementationUri) {
+    public Optional<PolicyImplementationDTOProjection> getPolicyImplementationDTOProjectionByUri(
+            String policyImplementationUri) {
         return repository.findByUri(policyImplementationUri, PolicyImplementationDTOProjection.class);
     }
 
-    public Page<PolicyImplementationDTOProjection> listDTOProjectionsByPolicy(Pageable pageable, PolicyDTOProjection policyDTOProjection) {
+    public Page<PolicyImplementationDTOProjection> listDTOProjectionsByPolicy(Pageable pageable,
+            PolicyDTOProjection policyDTOProjection) {
         return repository.findAllDTOByPolicyUri(pageable, policyDTOProjection.getUri());
     }
 
@@ -94,10 +109,12 @@ public class PolicyImplementationService extends ResourceService<PolicyImplement
     }
 
     /**
-     * Gets a link to the API where the policy implementation meta information can be accessed.
+     * Gets a link to the API where the policy implementation meta information can
+     * be accessed.
      */
     public String getPolicyImplementationLink(String name) {
-        return linkTo(methodOn(PolicyImplementationController.class).getPolicyImplementationById(name)).toUri().toString();
+        return linkTo(methodOn(PolicyImplementationController.class).getPolicyImplementationById(name)).toUri()
+                .toString();
     }
 
     public int countByPolicy(PolicyDTOProjection policyDTOProjection) {

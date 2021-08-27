@@ -20,6 +20,7 @@ import static de.fraunhofer.iosb.svs.analysishub.data.entity.PolicyBasedAnalysis
 @Node(primaryLabel = NODE_PREFIX + "JenaRule")
 public class JenaRule extends ProcessingRule {
     public JenaRule(String namespace, String localName, String description, Phase phase, Topic topic, List<Implementation> dependsOnImplementation, List<OntologyDependency> dependsOnOntologyDependency, String rule) {
+        // TODO should always be JenaTopic
         super(namespace, localName, description, phase, topic, dependsOnImplementation, dependsOnOntologyDependency, rule);
     }
 

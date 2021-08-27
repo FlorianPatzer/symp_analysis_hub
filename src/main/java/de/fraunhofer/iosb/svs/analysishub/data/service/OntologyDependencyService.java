@@ -76,6 +76,7 @@ public class OntologyDependencyService extends ResourceService<OntologyDependenc
      * The path is connected to the ontology dependency. Also the link to the API to reach the ontology file is added.
      */
     public OntologyDependency update(OntologyDependency ontologyDependency, InputStream inputStream) {
+        // TODO prefix uniqueness (probably add a constraint to neo4j)
 
         String location = ontologyDependencyFileService.saveOntologyDependencyFile(inputStream, ontologyDependency.getPrefix() + ".owl");
         OntologyDependencyFile ontologyDependencyFile = new OntologyDependencyFile(location);

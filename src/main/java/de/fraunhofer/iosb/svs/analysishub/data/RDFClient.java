@@ -79,6 +79,7 @@ public class RDFClient {
     }
 
     private ByteArrayResource enrichOntModel(String policyImplementationUri, DataBuffer dataBuffer) throws IOException {
+        // TODO the connection to the policy based ontology should be done in the database...
         OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
         ontModel.read(dataBuffer.asInputStream(), "RDF/XML");
         Ontology ontology = ontModel.createOntology(KNOWLEDGE_BASE_URI + "/" + URIUtil.getLocalName(policyImplementationUri) + "_Ontology");

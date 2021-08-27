@@ -24,6 +24,7 @@ import static de.fraunhofer.iosb.svs.analysishub.data.entity.PolicyBasedAnalysis
 @EqualsAndHashCode(callSuper = true)
 @Node(primaryLabel = NODE_PREFIX + "Implementation")
 public abstract class Implementation extends NamedIndividual {
+    // TODO Lists of depends on could probably be sets instead as there is no ordering
     private static final Logger log = LoggerFactory.getLogger(Implementation.class);
     private static final String IMPLEMENTATION_LABEL = NODE_PREFIX + "Implementation";
 
